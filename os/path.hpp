@@ -4,6 +4,10 @@
 #include "string.hpp"
 #include "util.hpp"
 
+#ifdef _WIN32
+    #include <Windows.h>
+#endif
+
 namespace os
 {
     namespace path
@@ -64,6 +68,26 @@ namespace os
             last = (last==-1)?path.length():last;
             return std::tuple<std::string,std::string>
                     (path.substr(0,last),path.substr(last));
+        }
+
+        bool isdirectory(std::string path)
+        {
+            DWORD attrib = ::GetFileAttributesA(path.c_str());
+            return (attrib!=INVALID_FILE_ATTRIBUTES &&
+                    attrib & FILE_ATTRIBUTE_DIRECTORY);
+        }
+
+        bool isfile(std::string path)
+        {
+            DWORD attrib = ::GetFileAttributesA(path.c_str());
+            return (attrib!=INVALID_FILE_ATTRIBUTES &&
+                    attrib & ~FILE_ATTRIBUTE_DIRECTORY);
+        }
+
+        bool exists(std::string path)
+        {
+            DWORD attrib = ::GetFileAttributesA(path.c_str());
+            return attrib!=INVALID_FILE_ATTRIBUTES;
         }
     }
 }
