@@ -6,11 +6,12 @@
 #include <QDebug>
 #include <QDir>
 #include <Windows.h>
+#include <QString>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    for(std::string f: os::listdir("d:/"))
+    for(std::string f: os::walk(R"(F:\Warcraft3)"))
     {
         printf("%s\n",f.c_str());
     }
