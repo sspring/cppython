@@ -1,9 +1,13 @@
+#pragma once
+
 #include <stdio.h>
 #include <direct.h>
 #include <tuple>
+#include <vector>
+#include <numeric>
+#include "builtin.hpp"
 #include "string.hpp"
 #include "util.hpp"
-
 #ifdef _WIN32
     #include <Windows.h>
 #endif
@@ -70,7 +74,7 @@ namespace os
                     (path.substr(0,last),path.substr(last));
         }
 
-        bool isdirectory(std::string path)
+        bool isdir(std::string path)
         {
             DWORD attrib = ::GetFileAttributesA(path.c_str());
             return (attrib!=INVALID_FILE_ATTRIBUTES &&
@@ -88,6 +92,13 @@ namespace os
         {
             DWORD attrib = ::GetFileAttributesA(path.c_str());
             return attrib!=INVALID_FILE_ATTRIBUTES;
+        }
+
+        std::string join(std::list<const char*> args)
+        {
+            return  normpath(string::join(
+                                 util::char2string(sep).c_str(),
+                                 args.begin(),args.end()));
         }
     }
 }

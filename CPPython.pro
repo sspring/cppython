@@ -11,7 +11,7 @@ QT       -= gui
 TARGET = CPPython
 CONFIG   += console
 CONFIG   -= app_bundle
-
+CONFIG   += C++11
 TEMPLATE = app
 
 
@@ -21,4 +21,5 @@ HEADERS += \
     os/path.hpp \
     os.hpp \
     string.hpp \
-    util.hpp
+    util.hpp \
+    builtin.hpp

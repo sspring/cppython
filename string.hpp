@@ -1,5 +1,4 @@
-#ifndef STRING_HPP
-#define STRING_HPP
+#pragma once
 
 #include <string>
 
@@ -35,6 +34,19 @@ namespace string
     {
         return rstrip(lstrip(str,chars),chars);
     }
-}
 
-#endif
+    template<typename Iter_Begin,typename Iter_End>
+    std::string join(const char* sep,Iter_Begin begin,Iter_End end)
+    {
+        std::string result;
+        if(begin!=end)
+        {
+            result = *(begin++);
+            for(;begin!=end;++begin)
+            {
+                result.append(sep).append(*begin);
+            }
+        }
+        return  result;
+    }
+}

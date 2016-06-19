@@ -2,16 +2,17 @@
 #include "os/path.hpp"
 #include "os.hpp"
 #include "string.hpp"
+#include "builtin.hpp"
 #include <QDebug>
 #include <QDir>
 #include <Windows.h>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    std::string path = "d:/1/";
-    for(auto i: os::listdir(path))
+    for(std::string f: os::listdir("d:/"))
     {
-        printf("%s\n",i.c_str());
+        printf("%s\n",f.c_str());
     }
     return a.exec();
 }

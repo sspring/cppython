@@ -1,9 +1,9 @@
-#ifndef OS_HPP
-#define OS_HPP
+#pragma once
 
 #include <stdio.h>
 #include <string>
 #include <list>
+#include "os/path.hpp"
 #ifdef _WIN32
     #include <direct.h>
     #include <windows.h>
@@ -30,23 +30,23 @@ namespace os
     listdir(std::string dir)
     {
         std::list<std::string> files;
+#ifdef _WIN32
         WIN32_FIND_DATAA FindFileData;
+        dir = os::path::normpath(dir+"/*.*");
         HANDLE hFind = ::FindFirstFileA(dir.c_str(), &FindFileData);
         if(hFind != INVALID_HANDLE_VALUE)
         {
                 do {
-                    if(! (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+                    if(strcmp(".",FindFileData.cFileName) &&
+                            strcmp("..",FindFileData.cFileName))
                     {
                         files.push_back(FindFileData.cFileName);
-                        printf("%s",FindFileData.cFileName);
                     }
                 }while(::FindNextFileA(hFind, &FindFileData));
                 ::FindClose(hFind);
         }
+#endif
         return files;
     }
 }
-
-
-#endif // OS_HPP
 

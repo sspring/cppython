@@ -1,5 +1,4 @@
-#ifndef UTIL_HPP
-#define UTIL_HPP
+#pragma once
 
 #include <string>
 #include <sstream>
@@ -15,6 +14,4 @@ namespace util
         return str;
     }
 }
-
-#endif // UTIL_HPP
 
