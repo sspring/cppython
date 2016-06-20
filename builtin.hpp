@@ -24,12 +24,33 @@ std::list<T> l(T value, Args... args)
     return retValue;
 }
 
-#define _reduce(Func,IterBegin,IterEnd,Result) \
-    {auto __it = IterBegin; \
-    if(__it != IterEnd){ \
-    Result = *__it++; \
-    for(;__it!=IterEnd;++__it) \
-    {Result = Func(Result,*__it);}}}
+template <typename Func,typename Container>
+auto reduce(Func f,Container &container)
+    ->typename Container::value_type
+{
+    typedef Container::value_type ReturnType;
+    ReturnType result  = ReturnType();
+    if(container.begin() != container.end())
+    {
+        Container::const_iterator it;
+        it = container.begin();
+        for(result = *(it++);it!=container.end();++it)
+        {
+            result = f(result,*it);
+        }
+    }
+    return result;
+}
 
-#define reduce(Func,Squence,Result) \
-    _reduce(Func,Squence.begin(),Squence.end(),Result)
+template<typename Func, typename Container>
+auto map(Func func, Container& container)
+    ->std::list<decltype(func(Container::value_type()))>
+{
+    typedef std::list<decltype(func(Container::value_type()))> ReturnType;
+    ReturnType result  = ReturnType();
+    for (Container::value_type value : container)
+    {
+        result.push_back(func(value));
+    }
+    return result;
+}
