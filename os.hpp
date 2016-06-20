@@ -27,7 +27,7 @@ namespace os
     }
 
     std::list<std::string>
-    listdir(std::string dir,__int64 includeAttrib=0,__int64 excludeAttrib=0)
+    listdir(std::string dir,DWORD includeAttrib=0,DWORD excludeAttrib=0)
     {
         // all files and directories if attrib is 0
         std::list<std::string> files;
