@@ -54,3 +54,19 @@ auto map(Func func, Container& container)
     }
     return result;
 }
+
+template<typename Func, typename Container>
+auto filter(Func func, Container& container)
+    ->std::list<decltype(Container::value_type())>
+{
+    typedef std::list<decltype(Container::value_type())> ReturnType;
+    ReturnType result  = ReturnType();
+    for (Container::value_type value : container)
+    {
+        if(func(value))
+        {
+            result.push_back(value);
+        }
+    }
+    return result;
+}
