@@ -8,6 +8,7 @@
 #include <map>
 #include "os/path.hpp"
 #ifdef _WIN32
+    #include <stdint.h>
     #include <direct.h>
     #include <windows.h>
 #else
