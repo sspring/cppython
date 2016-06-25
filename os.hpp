@@ -1,8 +1,9 @@
 #pragma once
 
 #include <stdio.h>
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <list>
 #include <map>
 #include "os/path.hpp"
@@ -10,6 +11,9 @@
     #include <direct.h>
     #include <windows.h>
 #else
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <dirent.h>
     #include <unistd.h>
     #define MAX_PATH 260
 #endif
@@ -34,26 +38,14 @@ namespace os
         return envs;
     }
 
-    std::string getcwd()
-    {
-        char buffer[255];
-        _getcwd(buffer,255);
-        return std::string(buffer);
-    }
-
-    void chdir(const std::string path)
-    {
-        _chdir(path.c_str());
-    }
-
     std::list<std::string>
-    listdir(std::string dir,DWORD includeAttrib=0,DWORD excludeAttrib=0)
+    listdir(std::string dir,uint32_t includeAttrib=0,uint32_t excludeAttrib=0)
     {
         // all files and directories if attrib is 0
         std::list<std::string> files;
 #ifdef _WIN32
-        WIN32_FIND_DATAA FindFileData;
         dir = os::path::normpath(dir);
+        WIN32_FIND_DATAA FindFileData;
         HANDLE hFind = ::FindFirstFileA((dir+"/*").c_str(), &FindFileData);
         if(hFind != INVALID_HANDLE_VALUE)
         {
@@ -67,6 +59,27 @@ namespace os
                     }
                 }while(::FindNextFileA(hFind, &FindFileData));
                 ::FindClose(hFind);
+        }
+#else
+        DIR *dirptr = opendir(dir.c_str());
+        if(dirptr != NULL)
+        {
+            struct stat s;
+            struct dirent *entry=NULL;
+            while (entry = readdir(dirptr))
+            {
+                std::string abspath = os::path::join(l(dir.c_str(),entry->d_name));
+                if(strcmp(entry->d_name,".") &&
+                        strcmp(entry->d_name,".." ) &&
+                        !stat(abspath.c_str(),&s) &&
+                        (!includeAttrib || includeAttrib == (s.st_mode&includeAttrib))&&
+                        (!excludeAttrib || 0 == (s.st_mode&excludeAttrib)))
+                {
+
+                    files.push_back(abspath);
+                }
+            }
+            closedir(dirptr);
         }
 #endif
         return files;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdio.h>
-#include <direct.h>
 #include <tuple>
 #include <vector>
 #include <numeric>
@@ -10,6 +9,10 @@
 #include "util.hpp"
 #ifdef _WIN32
     #include <Windows.h>
+    #include <direct.h>
+#else
+    #include <sys/stat.h>
+    #include <unistd.h>
 #endif
 
 namespace os
@@ -44,7 +47,11 @@ namespace os
                     }
                 }
             }
+#ifdef _WIN32
             return string::strip(path,"\r\t\n \\/");
+#else
+            return string::strip(path,"\r\t\b \\");
+#endif
         }
 
         std::tuple<std::string,std::string>
@@ -76,22 +83,37 @@ namespace os
 
         bool isdir(std::string path)
         {
+#ifdef _WIN32
             DWORD attrib = ::GetFileAttributesA(path.c_str());
             return (attrib!=INVALID_FILE_ATTRIBUTES &&
                     attrib & FILE_ATTRIBUTE_DIRECTORY);
+#else
+            struct stat s;
+            return  stat(path.c_str(),&s) == 0 && s.st_mode & S_IFDIR;
+#endif
         }
 
         bool isfile(std::string path)
         {
+#ifdef _WIN32
             DWORD attrib = ::GetFileAttributesA(path.c_str());
             return (attrib!=INVALID_FILE_ATTRIBUTES &&
                     attrib & ~FILE_ATTRIBUTE_DIRECTORY);
+#else
+            struct stat s;
+            return  stat(path.c_str(),&s) == 0 && !(s.st_mode & S_IFDIR);
+#endif
         }
 
         bool exists(std::string path)
         {
+#ifdef _WIN32
             DWORD attrib = ::GetFileAttributesA(path.c_str());
             return attrib!=INVALID_FILE_ATTRIBUTES;
+#else
+            struct stat s;
+            return  stat(path.c_str(),&s) == 0;
+#endif
         }
 
         std::string join(std::list<const char*> args)

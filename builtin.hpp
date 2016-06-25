@@ -26,13 +26,13 @@ std::list<T> l(T value, Args... args)
 
 template <typename Func,typename Container>
 auto reduce(Func f,Container &container)
-    ->typename Container::value_type
+    -> decltype(Container::value_type())
 {
-    typedef Container::value_type ReturnType;
+    typedef typename Container::value_type ReturnType;
     ReturnType result  = ReturnType();
     if(container.begin() != container.end())
     {
-        Container::const_iterator it;
+        typename Container::const_iterator it;
         it = container.begin();
         for(result = *(it++);it!=container.end();++it)
         {
@@ -44,11 +44,11 @@ auto reduce(Func f,Container &container)
 
 template<typename Func, typename Container>
 auto map(Func func, Container& container)
-    ->std::list<decltype(func(Container::value_type()))>
+    ->std::list<decltype(func(Container::value_type))>
 {
-    typedef std::list<decltype(func(Container::value_type()))> ReturnType;
+    typedef  std::list<decltype(func(Container::value_type()))> ReturnType;
     ReturnType result  = ReturnType();
-    for (Container::value_type value : container)
+    for (typename Container::value_type value : container)
     {
         result.push_back(func(value));
     }
@@ -61,7 +61,7 @@ auto filter(Func func, Container& container)
 {
     typedef std::list<decltype(Container::value_type())> ReturnType;
     ReturnType result  = ReturnType();
-    for (Container::value_type value : container)
+    for (typename Container::value_type value : container)
     {
         if(func(value))
         {
