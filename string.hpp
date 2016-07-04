@@ -55,7 +55,7 @@ namespace string
         return  result;
     }
 
-int convert(const char *from, const char *to,char* save, int savelen,const char *src, int srclen)
+int _convert(const char *from, const char *to,char* save, int savelen,const char *src, int srclen)
 {
         iconv_t cd;
         const char   *inbuf = src;
@@ -110,6 +110,18 @@ int convert(const char *from, const char *to,char* save, int savelen,const char 
         iconv_close(cd);
         return status;
     }
-
-
+    std::string decode(const char* from,std::string str)
+    {
+        int bsize=(str.length()+1)*2;
+        std::auto_ptr<char> buffer(new char[bsize]());
+        _convert(from,"UCS-2",buffer.get(),bsize,str.c_str(),str.length());
+        return std::string(buffer.get());
+    }
+    std::string encode(const char* to,std::string str)
+    {
+        int bsize=(str.length()+1)*4;
+        std::auto_ptr<char> buffer(new char[bsize]());
+        _convert("UCS-2",to,buffer.get(),bsize,str.c_str(),str.length());
+        return std::string(buffer.get());
+    }
 }
