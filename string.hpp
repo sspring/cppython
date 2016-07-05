@@ -55,13 +55,15 @@ namespace string
         return  result;
     }
 
-int _convert(const char *from, const char *to,char* save, int savelen,const char *src, int srclen)
-{
-        iconv_t cd;
+    int _convert(const char *from, const char *to,char* save, size_t savelen,const char *src, size_t srclen)
+    {
+        if(srclen<=0 || srclen<=0) return -1;
+        libiconv_t cd = iconv_open(to, from);
+        if( (int)cd == -1) return -1;
+
         const char   *inbuf = src;
         char *outbuf = save;
         size_t outbufsize = savelen;
-        int status = 0;
         size_t  savesize = 0;
         size_t inbufsize = srclen;
         const char* inptr = inbuf;
@@ -69,57 +71,43 @@ int _convert(const char *from, const char *to,char* save, int savelen,const char
         char* outptr = outbuf;
         size_t outsize = outbufsize;
 
-        cd = iconv_open(to, from);
-        iconv(cd,NULL,NULL,NULL,NULL);
-        if (inbufsize == 0) {
-            status = -1;
-            goto done;
-        }
         while (insize > 0)
         {
             size_t res = iconv(cd,(const char**)&inptr,&insize,&outptr,&outsize);
-            if (outptr != outbuf) {
+            if (outptr != outbuf) // iconv may change the address of inptr and outptr
+            {
                 int saved_errno = errno;
                 int outsize = outptr - outbuf;
                 strncpy(save+savesize, outbuf, outsize);
                 errno = saved_errno;
             }
-            if (res == (size_t)(-1)) {
-                if (errno == EILSEQ) {
+            if (res == (size_t)(-1))
+            {
+                if (errno == EILSEQ)
+                {
                     int one = 1;
                     iconvctl(cd,ICONV_SET_DISCARD_ILSEQ,&one);
-                    status = -3;
-                } else if (errno == EINVAL) {
-                    if (inbufsize == 0) {
-                        status = -4;
-                        goto done;
-                    } else {
-                        break;
-                    }
-                } else if (errno == E2BIG) {
-                    status = -5;
-                    goto done;
-                } else {
-                    status = -6;
-                    goto done;
+                }
+                else
+                {
+                    break;
                 }
             }
         }
-        status = strlen(save);
-    done:
         iconv_close(cd);
-        return status;
+        return errno;
     }
+
     std::string decode(const char* from,std::string str)
     {
-        int bsize=(str.length()+1)*2;
+        size_t bsize=(str.length()+1)*2;
         std::auto_ptr<char> buffer(new char[bsize]());
         _convert(from,"UCS-2",buffer.get(),bsize,str.c_str(),str.length());
         return std::string(buffer.get());
     }
     std::string encode(const char* to,std::string str)
     {
-        int bsize=(str.length()+1)*4;
+        size_t bsize=(str.length()+1)*4;
         std::auto_ptr<char> buffer(new char[bsize]());
         _convert("UCS-2",to,buffer.get(),bsize,str.c_str(),str.length());
         return std::string(buffer.get());
